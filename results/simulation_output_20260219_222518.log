@@ -1,0 +1,156 @@
+============================================================
+  IoT Secure Vault Authentication - Protocol Demo
+============================================================
+
+Parameters: N=16 keys, M=16 bytes/key, P=6 keys/challenge
+
+[Setup] Initializing shared vault...
+  Vault: 16 keys of 16 bytes each
+  Device ID: Device_001
+
+--------------------------------------------------
+  Session 1/3
+--------------------------------------------------
+
+  [Step 1] Device -> Server: M1
+    Device ID:  Device_001
+    Session ID: fa32aa9671fa1a5b
+
+  [Step 2] Server -> Device: M2
+    Challenge C1: [3, 4, 14, 5, 15, 6]
+    Nonce r1:     9859f2827e0fad28833934d44ec8020f...
+
+  [Step 3] Device -> Server: M3
+    Ciphertext:   d9d98aebdc381297c549f5c3be77979a...
+    (encrypted with k1 derived from C1)
+
+  [Step 4] Server -> Device: M4
+    Ciphertext:   1291a8901b3e406cea23669f548183af...
+    Server verified r1 - device is authenticated!
+
+  [Step 5] Finalization
+    Device verified r2 - server is authenticated!
+    Session Key (device): 8623090d52f13f1472eca62117475e0a...
+    Session Key (server): 8623090d52f13f1472eca62117475e0a...
+    Keys match: True
+    Vault updated for next session.
+
+--------------------------------------------------
+  Session 2/3
+--------------------------------------------------
+
+  [Step 1] Device -> Server: M1
+    Device ID:  Device_001
+    Session ID: d056f7ffb297bafa
+
+  [Step 2] Server -> Device: M2
+    Challenge C1: [3, 11, 9, 6, 8, 0]
+    Nonce r1:     b04b3aee52b5fd08cad0a3646b5e45d1...
+
+  [Step 3] Device -> Server: M3
+    Ciphertext:   d005002f9d59c4bcdaceeb5e7e837bb5...
+    (encrypted with k1 derived from C1)
+
+  [Step 4] Server -> Device: M4
+    Ciphertext:   4fa37b3d91e2ece6cb46affec3214fca...
+    Server verified r1 - device is authenticated!
+
+  [Step 5] Finalization
+    Device verified r2 - server is authenticated!
+    Session Key (device): e5f672a250b326113073a1db368e8848...
+    Session Key (server): e5f672a250b326113073a1db368e8848...
+    Keys match: True
+    Vault updated for next session.
+
+--------------------------------------------------
+  Session 3/3
+--------------------------------------------------
+
+  [Step 1] Device -> Server: M1
+    Device ID:  Device_001
+    Session ID: 19c031c2365d19e0
+
+  [Step 2] Server -> Device: M2
+    Challenge C1: [5, 9, 7, 15, 0, 2]
+    Nonce r1:     6b880240bae72fc5433405e95c538c3f...
+
+  [Step 3] Device -> Server: M3
+    Ciphertext:   6f263566eb4366b2b77b010f806e1c35...
+    (encrypted with k1 derived from C1)
+
+  [Step 4] Server -> Device: M4
+    Ciphertext:   cc1d413c506ddc43649a6973805bfef1...
+    Server verified r1 - device is authenticated!
+
+  [Step 5] Finalization
+    Device verified r2 - server is authenticated!
+    Session Key (device): e04b61cc837aa9bf84c246cefc600342...
+    Session Key (server): e04b61cc837aa9bf84c246cefc600342...
+    Keys match: True
+    Vault updated for next session.
+
+============================================================
+  All 3 sessions completed successfully!
+  Mutual authentication verified. Vaults stay in sync.
+============================================================
+
+============================================================
+  IoT Authentication - Experiment Suite
+============================================================
+
+Parameters: N=16, M=16, P=6
+Running experiments...
+
+  Secure Vault | 10 devices: 0.1619 ms (avg)
+  Secure Vault | 50 devices: 0.1758 ms (avg)
+  Secure Vault | 100 devices: 0.1629 ms (avg)
+  Secure Vault | 500 devices: 0.1591 ms (avg)
+  Secure Vault | 1000 devices: 0.1594 ms (avg)
+  ECC (P-256) | 10 devices: 2.0949 ms (avg)
+  ECC (P-256) | 50 devices: 2.2378 ms (avg)
+  ECC (P-256) | 100 devices: 2.1191 ms (avg)
+  ECC (P-256) | 500 devices: 2.0899 ms (avg)
+  ECC (P-256) | 1000 devices: 2.0769 ms (avg)
+  Simple Password | 10 devices: 0.0139 ms (avg)
+  Simple Password | 50 devices: 0.0080 ms (avg)
+  Simple Password | 100 devices: 0.0080 ms (avg)
+  Simple Password | 500 devices: 0.0086 ms (avg)
+  Simple Password | 1000 devices: 0.0080 ms (avg)
+
+=== Authentication Time Comparison (ms per device) ===
++-----------+-------------------+-------------------+-------------------+
+| # Devices |    Secure Vault   |    ECC (P-256)    |  Simple Password  |
++-----------+-------------------+-------------------+-------------------+
+|     10    | 0.1619 +/- 0.0078 | 2.0949 +/- 0.0475 | 0.0139 +/- 0.0059 |
+|     50    | 0.1758 +/- 0.0088 | 2.2378 +/- 0.2904 | 0.0080 +/- 0.0002 |
+|    100    | 0.1629 +/- 0.0058 | 2.1191 +/- 0.0680 | 0.0080 +/- 0.0001 |
+|    500    | 0.1591 +/- 0.0024 | 2.0899 +/- 0.0517 | 0.0086 +/- 0.0009 |
+|    1000   | 0.1594 +/- 0.0025 | 2.0769 +/- 0.0157 | 0.0080 +/- 0.0001 |
++-----------+-------------------+-------------------+-------------------+
+
+=== Detailed Breakdown ===
++-----------+-----------------+-----------+---------+----------+----------+
+| # Devices |      Method     | Mean (ms) | Std Dev | Min (ms) | Max (ms) |
++-----------+-----------------+-----------+---------+----------+----------+
+|     10    |   Secure Vault  |   0.1619  |  0.0078 |  0.1532  |  0.1693  |
+|     10    |   ECC (P-256)   |   2.0949  |  0.0475 |  2.0502  |  2.1632  |
+|     10    | Simple Password |   0.0139  |  0.0059 |  0.0080  |  0.0208  |
+|     50    |   Secure Vault  |   0.1758  |  0.0088 |  0.1672  |  0.1895  |
+|     50    |   ECC (P-256)   |   2.2378  |  0.2904 |  2.0708  |  2.7497  |
+|     50    | Simple Password |   0.0080  |  0.0002 |  0.0078  |  0.0084  |
+|    100    |   Secure Vault  |   0.1629  |  0.0058 |  0.1572  |  0.1713  |
+|    100    |   ECC (P-256)   |   2.1191  |  0.0680 |  2.0642  |  2.2282  |
+|    100    | Simple Password |   0.0080  |  0.0001 |  0.0079  |  0.0082  |
+|    500    |   Secure Vault  |   0.1591  |  0.0024 |  0.1568  |  0.1626  |
+|    500    |   ECC (P-256)   |   2.0899  |  0.0517 |  2.0578  |  2.1808  |
+|    500    | Simple Password |   0.0086  |  0.0009 |  0.0079  |  0.0100  |
+|    1000   |   Secure Vault  |   0.1594  |  0.0025 |  0.1568  |  0.1631  |
+|    1000   |   ECC (P-256)   |   2.0769  |  0.0157 |  2.0537  |  2.0942  |
+|    1000   | Simple Password |   0.0080  |  0.0001 |  0.0079  |  0.0081  |
++-----------+-----------------+-----------+---------+----------+----------+
+
+Bar chart saved to d:\++ICT Unipd Padova++\Cyber Physical Systems and IoT Security\Project 02 CyberPhysical Systems\My Project 2\FinalProject-CPS-IoTSec-IoTAuthentication\experiments\..\results\bar_chart_comparison.png
+Line chart saved to d:\++ICT Unipd Padova++\Cyber Physical Systems and IoT Security\Project 02 CyberPhysical Systems\My Project 2\FinalProject-CPS-IoTSec-IoTAuthentication\experiments\..\results\line_chart_scaling.png
+Log-scale bar chart saved to d:\++ICT Unipd Padova++\Cyber Physical Systems and IoT Security\Project 02 CyberPhysical Systems\My Project 2\FinalProject-CPS-IoTSec-IoTAuthentication\experiments\..\results\bar_chart_log_scale.png
+
+Experiments completed!
