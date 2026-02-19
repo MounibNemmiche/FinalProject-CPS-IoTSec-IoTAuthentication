@@ -21,7 +21,7 @@ Since this is a PC simulation (not running on constrained hardware like Arduino)
 
 The Secure Vault protocol follows a 4-message mutual authentication handshake:
 
-![Secure Vault handshake](Figures/01-The%20Secure%20Vault%20protocol%20follows%20a%204-message%20mutual%20authentication%20handshake.png)
+![Secure Vault handshake](Figures/01-The%20Secure%20Vault%20protocol%20follows%20a%204-message%20mutual%20authentication%20handshake.webp)
 ---
 
 ## Repository Structure
