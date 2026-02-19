@@ -11,7 +11,9 @@ Usage:
 """
 
 import argparse
+import os
 import sys
+from datetime import datetime
 
 from config import N, M, P
 from entities.vault import SecureVault
@@ -111,6 +113,28 @@ def run_experiments():
     print("\nExperiments completed!")
 
 
+class TeeWriter:
+    """Duplicates writes to both the terminal and a log file."""
+
+    def __init__(self, log_path: str):
+        self._terminal = sys.stdout
+        os.makedirs(os.path.dirname(log_path), exist_ok=True)
+        self._log_file = open(log_path, "w", encoding="utf-8")
+
+    def write(self, message: str) -> int:
+        self._terminal.write(message)
+        self._log_file.write(message)
+        self._log_file.flush()
+        return len(message)
+
+    def flush(self) -> None:
+        self._terminal.flush()
+        self._log_file.flush()
+
+    def close(self) -> None:
+        self._log_file.close()
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="IoT Secure Vault Authentication Simulation"
@@ -123,14 +147,27 @@ def main():
     )
     args = parser.parse_args()
 
-    if args.demo:
-        run_demo()
-    elif args.experiment:
-        run_experiments()
-    else:
-        # Run both
-        run_demo()
-        run_experiments()
+    # Set up logging: duplicate all print output to a .log file
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_dir = os.path.join(os.path.dirname(__file__), "experiments", "results")
+    log_path = os.path.join(log_dir, f"simulation_output_{timestamp}.log")
+    tee = TeeWriter(log_path)
+    sys.stdout = tee
+
+    try:
+        if args.demo:
+            run_demo()
+        elif args.experiment:
+            run_experiments()
+        else:
+            # Run both
+            run_demo()
+            run_experiments()
+
+        tee._terminal.write(f"\nLog file saved to {log_path}\n")
+    finally:
+        sys.stdout = tee._terminal
+        tee.close()
 
 
 if __name__ == "__main__":
