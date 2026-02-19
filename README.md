@@ -44,11 +44,12 @@ FinalProject-CPS-IoTSec-IoTAuthentication/
 |-- experiments/                # Performance comparison experiments
 |   |-- __init__.py
 |   |-- experiments_comparison.py   # SV vs ECC vs Simple Password benchmarks
-|   |-- results/                    # Generated output files
-|       |-- bar_chart_comparison.png
-|       |-- line_chart_scaling.png
-|       |-- bar_chart_log_scale.png
-|       |-- simulation_output_YYYYMMDD_HHMMSS.log
+|
+|-- results/                   # Generated output files (plots, logs)
+|   |-- bar_chart_comparison.png
+|   |-- line_chart_scaling.png
+|   |-- bar_chart_log_scale.png
+|   |-- simulation_output_YYYYMMDD_HHMMSS.log
 |
 |-- .gitignore
 ```
@@ -121,7 +122,7 @@ python main.py --experiment
 
 Benchmarks all three authentication methods (SV, ECC, Simple Password) across 5 device counts (10, 50, 100, 500, 1000 devices), averaged over 5 runs each. Outputs:
 - Console tables with mean, standard deviation, min, and max timings
-- Three plots saved to `experiments/results/`
+- Three plots saved to `results/`
 
 ---
 
@@ -203,7 +204,7 @@ The experiment suite produces two tables:
 
 ### Generated Plots
 
-All plots are saved to `experiments/results/`:
+All plots are saved to `results/`:
 
 | File | Description |
 |------|-------------|
@@ -213,10 +214,10 @@ All plots are saved to `experiments/results/`:
 
 ### Log File
 
-Every run automatically saves a complete copy of all terminal output to a timestamped `.log` file in `experiments/results/`:
+Every run automatically saves a complete copy of all terminal output to a timestamped `.log` file in `results/`:
 
 ```
-experiments/results/simulation_output_20260219_143025.log
+results/simulation_output_20260219_143025.log
 ```
 
 The log file contains the exact same content shown in the terminal (demo trace, experiment progress, summary tables, plot save paths). This allows you to review past runs without re-executing the simulation.

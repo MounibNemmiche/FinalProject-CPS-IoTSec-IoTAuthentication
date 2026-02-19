@@ -149,7 +149,7 @@ def main():
 
     # Set up logging: duplicate all print output to a .log file
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    log_dir = os.path.join(os.path.dirname(__file__), "experiments", "results")
+    log_dir = os.path.join(os.path.dirname(__file__), "results")
     log_path = os.path.join(log_dir, f"simulation_output_{timestamp}.log")
     tee = TeeWriter(log_path)
     sys.stdout = tee

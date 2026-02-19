@@ -257,7 +257,7 @@ def display_results_table(results: dict) -> None:
 def plot_results(results: dict, output_dir: str = None) -> None:
     """Generate bar chart and line chart comparing authentication methods."""
     if output_dir is None:
-        output_dir = os.path.join(os.path.dirname(__file__), "results")
+        output_dir = os.path.join(os.path.dirname(__file__), "..", "results")
     os.makedirs(output_dir, exist_ok=True)
 
     methods = list(results.keys())
