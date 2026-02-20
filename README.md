@@ -29,8 +29,8 @@ The Secure Vault protocol follows a 4-message mutual authentication handshake:
 ```
 FinalProject-CPS-IoTSec-IoTAuthentication/
 |
-|-- main.py                     # Entry point: protocol demo and experiment runner
-|-- config.py                   # Global constants (N, M, P, experiment parameters)
+|-- main.py                     # Part 1 entry point: demo + experiments
+|-- config.py                   # Global constants (N, M, P, experiment/attack parameters)
 |-- requirements.txt            # Python dependencies
 |-- README.md                   # This file
 |
@@ -45,11 +45,18 @@ FinalProject-CPS-IoTSec-IoTAuthentication/
 |   |-- __init__.py
 |   |-- experiments_comparison.py   # SV vs ECC vs Simple Password benchmarks
 |
-|-- results/                   # Generated output files (plots, logs)
+|-- Part 2-Attacks/             # Security attack simulations (Part 2)
+|   |-- __init__.py
+|   |-- main_attacks.py         # Part 2 entry point: run all attack simulations
+|   |-- crypto_attacks.py       # Brute force key guessing + vault key recovery (GF(2))
+|   |-- protocol_attacks.py     # Replay attack + Man-in-the-Middle (3 strategies)
+|
+|-- results/                    # Generated output files (plots, logs)
 |   |-- bar_chart_comparison.png
 |   |-- line_chart_scaling.png
 |   |-- bar_chart_log_scale.png
 |   |-- simulation_output_YYYYMMDD_HHMMSS.log
+|   |-- attacks_output_YYYYMMDD_HHMMSS.log
 |
 |-- .gitignore
 ```
@@ -64,6 +71,9 @@ FinalProject-CPS-IoTSec-IoTAuthentication/
 | `entities/device.py` | `IoTDevice` class -- implements the client side of the handshake (`step1_initiate`, `step3_respond`, `step5_finalize`) |
 | `entities/server.py` | `IoTServer` class -- implements the server side (`step2_challenge`, `step4_verify_and_respond`), manages registered devices and session state |
 | `experiments/experiments_comparison.py` | Runs all three authentication methods, measures per-device timing with `time.perf_counter()`, generates PrettyTable console output and matplotlib plots |
+| `Part 2-Attacks/main_attacks.py` | Standalone entry point for Part 2 -- runs all 4 attack simulations and displays a summary table |
+| `Part 2-Attacks/crypto_attacks.py` | Brute force key guessing (50K attempts vs 2^128 space) and vault key recovery via GF(2) constraint propagation |
+| `Part 2-Attacks/protocol_attacks.py` | Replay attack (post vault rotation) and MITM attack (3 strategies: r1 modification, message forgery, bit-flipping) |
 
 ---
 
@@ -95,15 +105,17 @@ pip install -r requirements.txt
 
 ## How to Run
 
-### Run Everything (Demo + Experiments)
+### Part 1: Protocol Demo + Experiments
+
+#### Run Everything (Demo + Experiments)
 
 ```bash
 python main.py
 ```
 
-This runs the protocol demo first, then the full experiment suite.
+This runs the protocol demo and the full experiment suite.
 
-### Run Protocol Demo Only
+#### Run Protocol Demo Only
 
 ```bash
 python main.py --demo
@@ -114,7 +126,7 @@ Executes 3 consecutive authentication sessions between a single device and serve
 - Vaults remain synchronized across multiple sessions
 - Mutual authentication succeeds (r1 and r2 validated)
 
-### Run Experiments Only
+#### Run Experiments Only
 
 ```bash
 python main.py --experiment
@@ -123,6 +135,14 @@ python main.py --experiment
 Benchmarks all three authentication methods (SV, ECC, Simple Password) across 5 device counts (10, 50, 100, 500, 1000 devices), averaged over 5 runs each. Outputs:
 - Console tables with mean, standard deviation, min, and max timings
 - Three plots saved to `results/`
+
+### Part 2: Security Attack Simulations
+
+```bash
+python "Part 2-Attacks/main_attacks.py"
+```
+
+Runs 4 attack simulations against the Secure Vault protocol to validate the paper's security claims. All attacks are expected to FAIL (protocol is SECURE). See the [Security Validation](#security-validation) section below for details.
 
 ---
 
@@ -212,15 +232,14 @@ All plots are saved to `results/`:
 | `line_chart_scaling.png` | Line chart showing how authentication time scales with number of devices |
 | `bar_chart_log_scale.png` | Same bar chart with logarithmic Y-axis, useful since ECC is ~13x slower than SV |
 
-### Log File
+### Log Files
 
 Every run automatically saves a complete copy of all terminal output to a timestamped `.log` file in `results/`:
 
 ```
-results/simulation_output_20260219_143025.log
+results/simulation_output_20260219_143025.log    # Part 1 (demo + experiments)
+results/attacks_output_20260219_143025.log        # Part 2 (attack simulations)
 ```
-
-The log file contains the exact same content shown in the terminal (demo trace, experiment progress, summary tables, plot save paths). This allows you to review past runs without re-executing the simulation.
 
 ---
 
@@ -243,6 +262,10 @@ ECC_CURVE = "P-256"
 
 # Simple password parameters
 PASSWORD_LENGTH = 16  # bytes
+
+# Attack simulation parameters
+BRUTE_FORCE_ATTEMPTS = 50_000      # Number of random keys to try
+VAULT_RECOVERY_SESSIONS = 50       # Number of sessions to observe for GF(2) attack
 ```
 
 ### Why N=16, M=16, P=6?
@@ -274,6 +297,43 @@ Each parameter has hard requirements imposed by the implementation:
 
 ---
 
+## Security Validation
+
+The `Part 2-Attacks/` module tests the protocol against 4 attack vectors -- 2 cryptographic and 2 protocol-level. All attacks use the same `entities/` code that runs the performance experiments, ensuring the validation applies to the exact implementation being benchmarked.
+
+### Attack Results
+
+```text
++----------------------------+---------------+--------+
+| Attack                     | Type          | Status |
++----------------------------+---------------+--------+
+| Brute Force Key Guessing   | Cryptographic | SECURE |
+| Vault Key Recovery (GF(2)) | Cryptographic | SECURE |
+| Replay Attack              | Protocol      | SECURE |
+| Man-in-the-Middle (MITM)   | Protocol      | SECURE |
++----------------------------+---------------+--------+
+```
+
+### Attack Descriptions
+
+| Attack | What It Does | Why It Fails |
+| ------ | ------------ | ------------ |
+| **Brute Force Key Guessing** | Generates 50,000 random M-byte keys, tries to decrypt captured M3 ciphertext, checks if plaintext contains the expected r1. P(success) = 50,000 / 2^128 ~ 10^-34 | Key space (2^128) is astronomically large -- exhaustive search is computationally infeasible |
+| **Vault Key Recovery (GF(2))** | Collects challenge-response pairs from multiple sessions and attempts constraint propagation over GF(2) to solve for individual vault keys | System is underdetermined (more unknowns than equations). Vault rotation after each session makes collected equations inconsistent |
+| **Replay Attack** | Captures M1 and M3 from a legitimate session, then replays them after the vault has been updated | Vault update changes all keys after each session -- old M3 was encrypted with a key derived from the old vault, which no longer matches |
+| **MITM -- 3 strategies** | (A) Modify r1 in M2, (B) Forge M3 with a random key, (C) Flip bits in M3 ciphertext | (A) r1 mismatch detected by server, (B) Wrong key produces invalid decryption, (C) Corrupted ciphertext fails PKCS7 unpadding or r1 verification |
+
+### Mapping to Paper's Security Claims
+
+| Paper's Claim | Validated By |
+| ------------- | ------------ |
+| Resistant to brute force | Attack 1: 50K keys tested against 2^128 space -- 0 successes |
+| Resistant to replay | Attack 3: replayed M3 rejected after vault rotation |
+| Resistant to MITM | Attack 4: all 3 tampering strategies blocked |
+| Vault update prevents dictionary attack | Attack 2: GF(2) recovery fails -- rotation destroys algebraic relationships |
+
+---
+
 ## References
 
 1. **S. Srinivas, A. Kumar, et al.** -- *"Authentication of IoT Device and IoT Server Using Secure Vaults"*, IEEE Internet of Things Journal. The reference paper that this project implements and evaluates. [(PDF included in repository)](Authentication_of_IoT_Device_and_IoT_Server_Using_Secure_Vaults.pdf)
@@ -287,4 +347,3 @@ Each parameter has hard requirements imposed by the implementation:
 5. **PrettyTable** -- Python library for formatted ASCII table output. https://github.com/jazzband/prettytable
 
 ---
-

@@ -147,10 +147,17 @@ def main():
     )
     args = parser.parse_args()
 
-    # Set up logging: duplicate all print output to a .log file
+    # Determine log filename based on mode
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    if args.demo:
+        log_name = f"protocol_demo_{timestamp}.log"
+    elif args.experiment:
+        log_name = f"experiments_{timestamp}.log"
+    else:
+        log_name = f"demo_and_experiments_{timestamp}.log"
+
     log_dir = os.path.join(os.path.dirname(__file__), "results")
-    log_path = os.path.join(log_dir, f"simulation_output_{timestamp}.log")
+    log_path = os.path.join(log_dir, log_name)
     tee = TeeWriter(log_path)
     sys.stdout = tee
 
@@ -164,7 +171,7 @@ def main():
             run_demo()
             run_experiments()
 
-        tee._terminal.write(f"\nLog file saved to {log_path}\n")
+        tee._terminal.write(f"\nLog file saved to {os.path.relpath(log_path)}\n")
     finally:
         sys.stdout = tee._terminal
         tee.close()
