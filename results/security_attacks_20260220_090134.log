@@ -1,0 +1,48 @@
+============================================================
+  IoT Authentication - Security Attack Simulations
+============================================================
+
+Parameters: N=16, M=16 bytes, P=6
+Running attack simulations...
+
+
+  ATTACK 1: Brute Force Key Guessing
+  N=16, M=16 bytes, P=6, attempts=50,000, key space=2^128
+  Keys tested: 50,000, valid decryptions: 0
+  Time: 0.293s, P(success) = 1.47e-34
+  Result: SECURE
+
+  ATTACK 2: Vault Key Recovery (GF(2) Linear Algebra)
+  N=16 keys, M=16 bytes, P=6, sessions=50
+  Without rotation: 0/16 keys recovered
+  With rotation:    0/16 keys recovered
+  Result: SECURE
+
+  ATTACK 3: Replay Attack
+  N=16, M=16 bytes, P=6
+  Captured M1 (device_id=replay_target) and M3
+  Vault has been updated after successful session
+  Replayed old M3 to new session: server REJECTED
+  Result: SECURE
+
+  ATTACK 4: Man-in-the-Middle (MITM)
+  N=16, M=16 bytes, P=6
+  Strategy A (modify r1):    BLOCKED
+  Strategy B (forged M3):    BLOCKED
+  Strategy C (bit-flipping): BLOCKED
+  Result: SECURE
+
+=== Security Attack Summary ===
++----------------------------+---------------+--------+
+| Attack                     | Type          | Status |
++----------------------------+---------------+--------+
+| Brute Force Key Guessing   | Cryptographic | SECURE |
+| Vault Key Recovery (GF(2)) | Cryptographic | SECURE |
+| Replay Attack              | Protocol      | SECURE |
+| Man-in-the-Middle (MITM)   | Protocol      | SECURE |
++----------------------------+---------------+--------+
+
+All attacks FAILED to breach the protocol.
+The Secure Vault protocol resisted all tested attack vectors.
+
+Attack simulations completed!
